@@ -41,10 +41,11 @@ namespace FluentMigrator.NHibernate
             var tf = new CSharpTemplateFromExpressionFactory();
             var serializedConfiguration = SerializeConfiguration(@to);
             var version = GetVersion();
+            var versionName = name.Replace("{Version}", version.ToString());
             var m = new Templates.CSharp.Migration
             {
                 Expressions = diff,
-                Name = name,
+                Name = versionName,
                 Namespace = MigrationNamespace,
                 SerializedConfiguration = serializedConfiguration,
                 TemplateFactory = tf,
@@ -57,7 +58,7 @@ namespace FluentMigrator.NHibernate
                 var result = new GeneratedMigration
                 {
                     Code = sw.GetStringBuilder().ToString(),
-                    Name = name,
+                    Name = versionName,
                     Version = version,
                 };
                 return result;
@@ -149,7 +150,6 @@ namespace FluentMigrator.NHibernate
         public static long FindNextVersion(Assembly migrationsAssembly)
         {
             var lastMigration = migrationsAssembly.ExportedTypes.Where(t => t.BaseType == typeof (Migration))
-                .Where(s => HasConfigurationData(s))
                 .Select(t => GetVersion(t))
                 .OrderBy(x => x)
                 .LastOrDefault();
